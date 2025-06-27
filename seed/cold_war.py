@@ -6,7 +6,7 @@ import os
 # Access project root
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.database import db  # Make sure app/database.py exists and exports `db`
+from database import db  # Make sure app/database.py exists and exports `db`
 
 # Collections
 event_collection = db["events"]
@@ -123,8 +123,8 @@ cold_war_timeline = [
 
 async def seed_cold_war():
     try:
-        await event_collection.delete_many({"slug": "cold-war"})
-        await timeline_collection.delete_many({"slug": {"$exists": False}, "eventId": {"$exists": True}})
+        # await event_collection.delete_many({"slug": "cold-war"})
+        # await timeline_collection.delete_many({"slug": {"$exists": False}, "eventId": {"$exists": True}})
 
         result = await event_collection.insert_one(cold_war)
         event_id = result.inserted_id

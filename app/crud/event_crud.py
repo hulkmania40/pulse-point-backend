@@ -1,4 +1,4 @@
-from app.database import db
+from database import db
 from app.models.event_model import EventModel
 from bson import ObjectId
 import datetime

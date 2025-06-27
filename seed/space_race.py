@@ -6,7 +6,7 @@ import os
 # Ensure access to app modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.database import db  # assumes you have `app/database.py` with `db` exported
+from database import db  # assumes you have `app/database.py` with `db` exported
 
 # Collections
 event_collection = db["events"]
@@ -106,8 +106,8 @@ space_race_timeline = [
 async def seed_space_race():
     try:
         # Optional: delete previous version
-        await event_collection.delete_many({"slug": "space-race"})
-        await timeline_collection.delete_many({"slug": {"$exists": False}, "eventId": {"$exists": True}})
+        # await event_collection.delete_many({"slug": "space-race"})
+        # await timeline_collection.delete_many({"slug": {"$exists": False}, "eventId": {"$exists": True}})
 
         # Insert main event
         result = await event_collection.insert_one(space_race)

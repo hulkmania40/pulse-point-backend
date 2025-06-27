@@ -1,4 +1,4 @@
-from app.database import db
+from database import db
 from app.models.timeline_model import TimelineItemModel
 from bson import ObjectId
 import datetime

@@ -5,7 +5,7 @@ import os
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from app.database import db
+from database import db
 
 # Collections
 event_collection = db["events"]
@@ -238,8 +238,8 @@ ww2_timeline = ww2_data + ww2_additional
 
 async def seed():
     try:
-        await event_collection.delete_many({})
-        await timeline_collection.delete_many({})
+        # await event_collection.delete_many({})
+        # await timeline_collection.delete_many({})
 
         ww1_result = await event_collection.insert_one(ww1)
         ww1_id = ww1_result.inserted_id
