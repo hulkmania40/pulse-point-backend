@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import sys
 import os
+from datetime import datetime
 
 # Access project root
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -12,7 +13,7 @@ from database import db  # Make sure app/database.py exists and exports `db`
 event_collection = db["events"]
 timeline_collection = db["timelines"]
 
-now = datetime.datetime.utcnow()
+now = datetime.utcnow()
 
 # --------------------------
 # Cold War Event & Timeline
@@ -66,7 +67,7 @@ cold_war_timeline = [
         ]
     },
     {
-        "date": "October 16–28, 1962",
+        "date": "October 16, 1962",
         "title": "Cuban Missile Crisis",
         "subtitle": "Closest to nuclear war",
         "status": "Crisis",
@@ -121,6 +122,15 @@ cold_war_timeline = [
     }
 ]
 
+# Helper to parse flexible date strings
+def parse_flexible_date(date_str: str) -> datetime:
+    for fmt in ("%B %d, %Y", "%B %Y", "%Y"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Unknown date format: {date_str}")
+
 async def seed_cold_war():
     try:
         # await event_collection.delete_many({"slug": "cold-war"})
@@ -130,6 +140,9 @@ async def seed_cold_war():
         event_id = result.inserted_id
 
         for item in cold_war_timeline:
+            # Convert string date to datetime object
+            item["date"] = parse_flexible_date(item["date"])
+
             item["eventId"] = event_id
             item["dateCreated"] = now
             item["dateUpdated"] = now

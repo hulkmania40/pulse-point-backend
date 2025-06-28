@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import sys
 import os
+from datetime import datetime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -11,7 +12,7 @@ from database import db
 event_collection = db["events"]
 timeline_collection = db["timelines"]
 
-now = datetime.datetime.utcnow()
+now = datetime.utcnow()
 
 # --------------------
 # WW1 Main Event & Timeline
@@ -236,6 +237,15 @@ ww2_additional = [
 ww1_timeline = ww1_data + ww1_additional
 ww2_timeline = ww2_data + ww2_additional
 
+# Helper to parse flexible date strings
+def parse_flexible_date(date_str: str) -> datetime:
+    for fmt in ("%B %d, %Y", "%B %Y", "%Y"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Unknown date format: {date_str}")
+
 async def seed():
     try:
         # await event_collection.delete_many({})
@@ -245,6 +255,9 @@ async def seed():
         ww1_id = ww1_result.inserted_id
 
         for item in ww1_timeline:
+            # Convert string date to datetime object
+            item["date"] = parse_flexible_date(item["date"])
+
             item["eventId"] = ww1_id
             item["dateCreated"] = now
             item["dateUpdated"] = now
@@ -254,6 +267,9 @@ async def seed():
         ww2_id = ww2_result.inserted_id
 
         for item in ww2_timeline:
+            # Convert string date to datetime object
+            item["date"] = parse_flexible_date(item["date"])
+
             item["eventId"] = ww2_id
             item["dateCreated"] = now
             item["dateUpdated"] = now

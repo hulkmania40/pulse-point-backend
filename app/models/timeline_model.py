@@ -7,7 +7,7 @@ from app.models.common import PyObjectId  # ✅ Import shared PyObjectId
 class TimelineItemModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
     eventId: PyObjectId  # Reference to parent event
-    date: str
+    date: datetime.datetime
     title: str
     subtitle: Optional[str] = None
     status: Optional[str] = None

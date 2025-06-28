@@ -2,6 +2,8 @@ import asyncio
 import datetime
 import sys
 import os
+from datetime import datetime
+
 
 # Ensure access to app modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -12,7 +14,7 @@ from database import db  # assumes you have `app/database.py` with `db` exported
 event_collection = db["events"]
 timeline_collection = db["timelines"]
 
-now = datetime.datetime.utcnow()
+now = datetime.utcnow()
 
 # --------------------------
 # Space Race Event & Timeline
@@ -79,7 +81,7 @@ space_race_timeline = [
         "imageSource": "NASA",
         "events": [
             "Neil Armstrong and Buzz Aldrin land on the Moon.",
-            "Fulfills JFK’s 1961 goal.",
+            "Fulfills JFK's 1961 goal.",
             "\"One small step for man...\" moment broadcast worldwide."
         ]
     },
@@ -103,6 +105,15 @@ space_race_timeline = [
     }
 ]
 
+# Helper to parse flexible date strings
+def parse_flexible_date(date_str: str) -> datetime:
+    for fmt in ("%B %d, %Y", "%B %Y", "%Y"):
+        try:
+            return datetime.strptime(date_str, fmt)
+        except ValueError:
+            continue
+    raise ValueError(f"Unknown date format: {date_str}")
+
 async def seed_space_race():
     try:
         # Optional: delete previous version
@@ -115,6 +126,9 @@ async def seed_space_race():
 
         # Insert timeline items
         for item in space_race_timeline:
+            # Convert string date to datetime object
+            item["date"] = parse_flexible_date(item["date"])
+
             item["eventId"] = event_id
             item["dateCreated"] = now
             item["dateUpdated"] = now
