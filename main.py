@@ -8,7 +8,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://pulse-point-frontend.onrender.com",
+        "https://pulse-point.onrender.com/",
         "http://localhost:5173"
         ],
     allow_credentials=True,
