@@ -30,3 +30,6 @@ class TimelineItemModel(BaseModel):
 class TimelineEventRequest(BaseModel):
     eventDetails: EventModel
     timeLinesDetails: List[TimelineItemModel]
+
+class UpdateTimelineEventRequest(TimelineEventRequest):
+    eventId: str
