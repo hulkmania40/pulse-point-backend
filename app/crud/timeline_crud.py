@@ -1,28 +1,47 @@
+from app.models.event_model import EventModel
 from database import db
 from app.models.timeline_model import TimelineItemModel
 from bson import ObjectId
 import datetime
 
 timeline_collection = db["timelines"]
-event_collection = db["events"]
+events_collection = db["events"]
 
 async def get_timeline(event_id: str):
     cursor = timeline_collection.find({"eventId": ObjectId(event_id)}).sort("date", -1)
     result = await cursor.to_list(length=100)
     return [TimelineItemModel(**doc) for doc in result]
 
-async def create_timeline_item(item: dict):
-    item["eventId"] = ObjectId(item["eventId"])
-    item["dateCreated"] = item["dateUpdated"] = datetime.datetime.utcnow()
-    res = await timeline_collection.insert_one(item)
+from typing import List
+from bson import ObjectId
+import datetime
 
-    # Update parent event's dateUpdated
-    await event_collection.update_one(
-        {"_id": item["eventId"]},
-        {"$set": {"dateUpdated": datetime.datetime.utcnow()}}
-    )
+async def create_timeline_events(data: dict):
+    timelines_data: List[dict] = data["timeLinesDetails"]
+    event_data: dict = data["eventDetails"]
 
-    return await get_timeline_item(str(res.inserted_id))
+    # Add timestamps to event_data
+    now = datetime.datetime.utcnow()
+    event_data["dateCreated"] = event_data["dateUpdated"] = now
+
+    # Insert event_data, MongoDB generates _id
+    event_result = await events_collection.insert_one(event_data)
+    generated_event_id = event_result.inserted_id  # This is the new ObjectId
+
+    # Attach generated_event_id to each timeline item
+    for timeline in timelines_data:
+        timeline["eventId"] = generated_event_id
+        timeline["dateCreated"] = timeline["dateUpdated"] = now
+
+    # Insert all timeline items into 'timelines' collection
+    if timelines_data:
+        await timeline_collection.insert_many(timelines_data)
+
+    return {
+        "message": "Event and timeline entries created successfully",
+        "eventId": str(generated_event_id),
+        "timelineCount": len(timelines_data),
+    }
 
 async def get_timeline_item(item_id: str):
     doc = await timeline_collection.find_one({"_id": ObjectId(item_id)})
@@ -35,7 +54,7 @@ async def update_timeline_item(item_id: str, update: dict):
     # Update the parent event's last modified time
     updated_doc = await timeline_collection.find_one({"_id": ObjectId(item_id)})
     if updated_doc:
-        await event_collection.update_one(
+        await events_collection.update_one(
             {"_id": updated_doc["eventId"]},
             {"$set": {"dateUpdated": datetime.datetime.utcnow()}}
         )

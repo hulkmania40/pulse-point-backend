@@ -2,7 +2,8 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import datetime
 
-from app.models.common import PyObjectId  # ✅ Import shared PyObjectId
+from app.models.common import PyObjectId
+from app.models.event_model import EventModel  # ✅ Import shared PyObjectId
 
 class TimelineItemModel(BaseModel):
     id: Optional[PyObjectId] = Field(alias="_id")
@@ -25,3 +26,7 @@ class TimelineItemModel(BaseModel):
     class Config:
         arbitrary_types_allowed = True
         populate_by_name = True
+
+class TimelineEventRequest(BaseModel):
+    eventDetails: EventModel
+    timeLinesDetails: List[TimelineItemModel]

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from app.models.timeline_model import TimelineItemModel
+from app.models.event_model import EventModel
+from app.models.timeline_model import TimelineEventRequest, TimelineItemModel
 from app.crud.timeline_crud import *
 
 router = APIRouter()
@@ -8,11 +9,15 @@ router = APIRouter()
 async def get_timeline_for_event(event_id: str):
     return await get_timeline(event_id)
 
-@router.post("/events/{event_id}/timeline", response_model=TimelineItemModel)
-async def create_timeline(event_id: str, item: TimelineItemModel):
-    item_dict = item.dict(by_alias=True, exclude={"id"})
-    item_dict["eventId"] = event_id
-    return await create_timeline_item(item_dict)
+@router.post("/timeline")
+async def create_timeline_event(payload: TimelineEventRequest):
+    return await create_timeline_events(payload.dict())
+
+# @router.post("/events/{event_id}/timeline", response_model=TimelineItemModel)
+# async def create_timeline(event_id: str, item: TimelineItemModel):
+#     item_dict = item.dict(by_alias=True, exclude={"id"})
+#     item_dict["eventId"] = event_id
+#     return await create_timeline_item(item_dict)
 
 @router.get("/timeline/{item_id}", response_model=TimelineItemModel)
 async def get_item(item_id: str):
