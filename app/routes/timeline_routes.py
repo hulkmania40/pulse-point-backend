@@ -9,20 +9,13 @@ router = APIRouter()
 async def get_timeline_for_event(event_id: str):
     return await fetch_timeline_event_data(event_id)
 
-@router.post("/timeline")
+@router.post("/timeline/add")
 async def create_timeline_event(payload: TimelineEventRequest):
-    return await create_timeline_events(payload.dict())
+    return await create_timeline_events(payload.dict(by_alias=True, exclude_unset=True))
 
 @router.put("/timeline")
 async def update_timeline_event(payload: UpdateTimelineEventRequest):
     return await update_timeline_events(payload.dict())
-
-@router.get("/timeline/{item_id}", response_model=TimelineItemModel)
-async def get_item(item_id: str):
-    item = await get_timeline_item(item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Timeline item not found")
-    return item
 
 @router.delete("/timeline/{item_id}")
 async def delete_item(item_id: str):

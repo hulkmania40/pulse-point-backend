@@ -1,10 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import datetime
-from app.models.common import PyObjectId  # ✅ Import the shared PyObjectId
+from app.models.common import PyObjectId
 
-class EventModel(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
+class EventInputModel(BaseModel):
     title: str
     slug: str
     tags: List[str]
@@ -17,3 +16,6 @@ class EventModel(BaseModel):
     class Config:
         populate_by_name = True
         arbitrary_types_allowed = True
+
+class EventModel(EventInputModel):
+    id: PyObjectId = Field(alias="_id")

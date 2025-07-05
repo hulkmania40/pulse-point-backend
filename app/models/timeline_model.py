@@ -3,11 +3,10 @@ from typing import List, Optional
 import datetime
 
 from app.models.common import PyObjectId
-from app.models.event_model import EventModel  # ✅ Import shared PyObjectId
+from app.models.event_model import EventInputModel
 
-class TimelineItemModel(BaseModel):
-    id: Optional[PyObjectId] = Field(alias="_id")
-    eventId: PyObjectId  # Reference to parent event
+class TimelineItemInputModel(BaseModel):
+    eventId: Optional[PyObjectId] = None
     date: datetime.datetime
     title: str
     subtitle: Optional[str] = None
@@ -20,16 +19,17 @@ class TimelineItemModel(BaseModel):
     imageType: Optional[str] = None
     imageSource: Optional[str] = None
     events: List[str] = []
-    dateCreated: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
-    dateUpdated: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
 
     class Config:
         arbitrary_types_allowed = True
         populate_by_name = True
 
+class TimelineItemModel(TimelineItemInputModel):
+    id: PyObjectId = Field(alias="_id")
+
 class TimelineEventRequest(BaseModel):
-    eventDetails: EventModel
-    timeLinesDetails: List[TimelineItemModel]
+    eventDetails: EventInputModel
+    timeLinesDetails: List[TimelineItemInputModel]
 
 class UpdateTimelineEventRequest(TimelineEventRequest):
     eventId: str

@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 from app.models.event_model import EventModel
 from database import db
-from app.models.timeline_model import TimelineItemModel
+from app.models.timeline_model import TimelineItemInputModel, TimelineItemModel
 from typing import List
 from bson import ObjectId
 import datetime
@@ -61,21 +61,26 @@ async def create_timeline_events(data: dict):
 
     # Insert event_data, MongoDB generates _id
     event_result = await events_collection.insert_one(event_data)
-    generated_event_id = event_result.inserted_id  # This is the new ObjectId
+    generated_event_id = event_result.inserted_id  # ObjectId
 
-    # Attach generated_event_id to each timeline item
+    # Attach generated_event_id + timestamps to each timeline item
+    timeline_docs = []
     for timeline in timelines_data:
-        timeline["eventId"] = generated_event_id
-        timeline["dateCreated"] = timeline["dateUpdated"] = now
+        timeline_doc = TimelineItemInputModel(
+            **timeline,
+            eventId=generated_event_id
+        ).dict(by_alias=True, exclude_unset=True)
+        timeline_doc["dateCreated"] = timeline_doc["dateUpdated"] = now
+        timeline_docs.append(timeline_doc)
 
-    # Insert all timeline items into 'timelines' collection
-    if timelines_data:
-        await timeline_collection.insert_many(timelines_data)
+    # Bulk insert into 'timelines' collection
+    if timeline_docs:
+        await timeline_collection.insert_many(timeline_docs)
 
     return {
         "message": "Event and timeline entries created successfully",
         "eventId": str(generated_event_id),
-        "timelineCount": len(timelines_data),
+        "timelineCount": len(timeline_docs),
     }
 
 async def update_timeline_events(data: dict):
