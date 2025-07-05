@@ -16,13 +16,8 @@ async def fetch_timeline_event_data(event_id: str):
         raise HTTPException(status_code=400, detail="Invalid eventId format")
 
     try:
-        print("SUPERMAN" * 10)
-        print(event_id)
-
         # Get the event document
         event_data = await events_collection.find_one({"_id": obj_id})
-        print("-" * 50)
-        print(event_data)
 
         if not event_data:
             raise HTTPException(status_code=404, detail="Event not found")
@@ -31,8 +26,7 @@ async def fetch_timeline_event_data(event_id: str):
         event_data["eventId"] = str(event_data.pop("_id"))
 
         # Timeline query
-        print("$" * 50)
-        timeline_docs = await timeline_collection.find({"eventId": obj_id}).to_list(length=None)
+        timeline_docs = await timeline_collection.find({"eventId": event_id}).to_list(length=None)
 
         # Convert ObjectIds to strings
         for doc in timeline_docs:
