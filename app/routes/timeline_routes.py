@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from app.models.event_model import EventModel
 from app.models.timeline_model import TimelineEventRequest, TimelineItemModel, UpdateTimelineEventRequest
 from app.crud.timeline_crud import *
+from app.utils.depends import require_authenticated_user
 
 router = APIRouter()
 
 @router.get("/events/{event_id}/timeline", response_model=TimelineEventRequest)
-async def get_timeline_for_event(event_id: str):
+async def get_timeline_for_event(event_id: str,user=Depends(require_authenticated_user)):
     return await fetch_timeline_event_data(event_id)
 
 @router.post("/timeline/add")
