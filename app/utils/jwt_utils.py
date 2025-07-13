@@ -1,12 +1,16 @@
 from datetime import datetime, timedelta
 import os
+from dotenv import load_dotenv
+
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
 from typing import Optional
 
+load_dotenv()
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = os.getenv("ALGORITHM")
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES"))
 
 # ✅ Create JWT access token
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
