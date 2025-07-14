@@ -1,21 +1,10 @@
-from pydantic import BaseModel, Field, EmailStr
 from typing import Optional
 from bson import ObjectId
 from datetime import datetime
 
-# 👇 Helper to handle ObjectId in Pydantic
-class PyObjectId(ObjectId):
-    @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+from pydantic import BaseModel, EmailStr, Field
 
-    @classmethod
-    def validate(cls, v):
-        if isinstance(v, ObjectId):
-            return v
-        if isinstance(v, str) and ObjectId.is_valid(v):
-            return ObjectId(v)
-        raise ValueError("Invalid ObjectId")
+from app.models.common import PyObjectId
 
 # ✅ Base User model (shared fields)
 class UserBase(BaseModel):
@@ -52,6 +41,6 @@ class UserPublic(UserBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
     class Config:
-        validate_by_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth_routes, event_routes, timeline_routes
+from app.routes import auth_routes, event_routes, timeline_routes, user_routes
 
 app = FastAPI()
 
@@ -21,3 +21,4 @@ app.add_middleware(
 app.include_router(event_routes.router)
 app.include_router(timeline_routes.router)
 app.include_router(auth_routes.router)
+app.include_router(user_routes.router)

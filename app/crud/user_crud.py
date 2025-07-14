@@ -56,3 +56,9 @@ async def verify_user(identifier: str, password: str, users_collection: AsyncIOM
     if not verify_password(password, user["hashed_password"]):
         return None
     return user
+
+async def fetch_user_details(user_id: str, users_collection: AsyncIOMotorCollection):
+    user = await users_collection.find_one({
+        "_id": ObjectId(user_id)
+    })
+    return user

@@ -10,7 +10,6 @@ from database import db
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-
 # ✅ Signup Route
 @router.post("/signup", status_code=201)
 async def signup(
