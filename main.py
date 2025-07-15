@@ -22,3 +22,6 @@ app.include_router(event_routes.router)
 app.include_router(timeline_routes.router)
 app.include_router(auth_routes.router)
 app.include_router(user_routes.router)
+
+
+# uvicorn main:app --reload
