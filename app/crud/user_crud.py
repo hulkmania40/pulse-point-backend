@@ -58,7 +58,7 @@ async def verify_user(identifier: str, password: str, users_collection: AsyncIOM
     return user
 
 async def fetch_user_details(user_id: str, users_collection: AsyncIOMotorCollection):
-    user = await users_collection.find_one({
-        "_id": ObjectId(user_id)
-    })
-    return user
+    try:
+        return await users_collection.find_one({ "_id": ObjectId(user_id) })
+    except Exception:
+        return None  # in case of invalid ObjectId format

@@ -2,7 +2,7 @@ from typing import Optional
 from bson import ObjectId
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.models.common import PyObjectId
 
@@ -16,6 +16,14 @@ class UserBase(BaseModel):
     mobile_verified: bool = False
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+
+    @field_validator("mobile")
+    def validate_mobile(cls, v):
+        if v is None:
+            return v
+        if not v.isdigit() or len(v) != 10:
+            raise ValueError("Mobile must be a 10-digit number")
+        return v
 
 # ✅ Model used for creating a user (input)
 class UserCreate(UserBase):
