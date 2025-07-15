@@ -14,32 +14,40 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-# ✅ Create user
+from bson import ObjectId
+
+from bson import ObjectId
+from datetime import datetime
+
 async def create_user(user_data: UserCreate, users_collection: AsyncIOMotorCollection):
-    existing = await users_collection.find_one({"username": user_data.username})
-    if existing:
+    if await users_collection.find_one({"username": user_data.username}):
         raise ValueError("Username already exists")
 
-    if user_data.email:
-        email_exists = await users_collection.find_one({"email": user_data.email})
-        if email_exists:
-            raise ValueError("Email already in use")
+    if user_data.email and await users_collection.find_one({"email": user_data.email}):
+        raise ValueError("Email already in use")
 
-    if user_data.mobile:
-        mobile_exists = await users_collection.find_one({"mobile": user_data.mobile})
-        if mobile_exists:
-            raise ValueError("Mobile already in use")
+    if user_data.mobile and await users_collection.find_one({"mobile": user_data.mobile}):
+        raise ValueError("Mobile already in use")
 
     now = datetime.utcnow()
+
     user = UserInDB(
-        **user_data.dict(exclude={"password", "created_at", "updated_at"}),
+        **user_data.model_dump(exclude={"password", "created_at", "updated_at"}),
         hashed_password=hash_password(user_data.password),
         created_at=now,
         updated_at=now
     )
 
-    result = await users_collection.insert_one(user.dict(by_alias=True))
-    return str(result.inserted_id)
+    # ✅ Dump as plain Python dict (no JSON serialization)
+    mongo_data = user.model_dump(by_alias=True, mode="python")
+
+    # ✅ Remove `_id` if it's still a str
+    if "_id" in mongo_data and isinstance(mongo_data["_id"], str):
+        mongo_data["_id"] = ObjectId(mongo_data["_id"])  # convert back to ObjectId
+
+    result = await users_collection.insert_one(mongo_data)
+    inserted_id = result.inserted_id
+    return str(inserted_id)
 
 # ✅ Get user by username or email
 async def get_user_by_identifier(identifier: str, users_collection: AsyncIOMotorCollection):

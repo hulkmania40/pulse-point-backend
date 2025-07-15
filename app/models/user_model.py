@@ -31,13 +31,14 @@ class UserCreate(UserBase):
 
 # ✅ Model used for database response/output
 class UserInDB(UserBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: Optional[PyObjectId] = Field(default_factory=PyObjectId, alias="_id")
     hashed_password: str
 
     class Config:
-        validate_by_name = True
+        populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
+
 
 # ✅ Model used for user login
 class UserLogin(BaseModel):
